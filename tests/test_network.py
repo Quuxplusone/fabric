@@ -546,6 +546,21 @@ class TestConnections(FabricTest):
         with settings(hide('everything'), skip_bad_hosts=True):
             execute(subtask, hosts=['nope.nonexistent.com'])
 
+    def test_should_warn_when_skip_bad_hosts_in_list(self):
+        """
+        env.skip_bad_hosts_in_list => list of expected-bad hosts to skip
+        """
+        with settings(hide('everything'), skip_bad_hosts_in_list=['nope.nonexistent.com']):
+            execute(subtask, hosts=['nope.nonexistent.com'])
+
+    @aborts
+    def test_should_abort_when_skip_bad_hosts_in_list(self):
+        """
+        env.skip_bad_hosts_in_list => list of expected-bad hosts to skip
+        """
+        with settings(hide('everything'), skip_bad_hosts_in_list=['nope.nonexistent.com']):
+            execute(subtask, hosts=['nope2.nonexistent.com'])
+
 
 @parallel
 def parallel_subtask():
@@ -566,6 +581,21 @@ class TestParallelConnections(FabricTest):
         """
         with settings(hide('everything'), skip_bad_hosts=True):
             execute(parallel_subtask, hosts=['nope.nonexistent.com'])
+
+    def test_should_warn_when_skip_bad_hosts_in_list(self):
+        """
+        env.skip_bad_hosts_in_list => list of expected-bad hosts to skip
+        """
+        with settings(hide('everything'), skip_bad_hosts_in_list=['nope.nonexistent.com']):
+            execute(subtask, hosts=['nope.nonexistent.com'])
+
+    @aborts
+    def test_should_abort_when_skip_bad_hosts_in_list(self):
+        """
+        env.skip_bad_hosts_in_list => list of expected-bad hosts to skip
+        """
+        with settings(hide('everything'), skip_bad_hosts_in_list=['nope.nonexistent.com']):
+            execute(subtask, hosts=['nope2.nonexistent.com', 'nope.nonexistent.com'])
 
 
 class TestSSHConfig(FabricTest):

@@ -243,6 +243,11 @@ env_options = [
         help="skip over hosts that can't be reached"
     ),
 
+    make_option('--skip-bad-hosts-in-list',
+        default=[],
+        help="comma-separated list of hosts to skip if they can't be reached"
+    ),
+
     make_option('--skip-unknown-tasks',
         action="store_true",
         default=False,
@@ -339,6 +344,7 @@ env = _AttributeDict({
     'roledefs': {},
     'shell_env': {},
     'skip_bad_hosts': False,
+    'skip_bad_hosts_in_list': [],
     'skip_unknown_tasks': False,
     'ssh_config_path': default_ssh_config_path,
     'ok_ret_codes': [0],     # a list of return codes that indicate success

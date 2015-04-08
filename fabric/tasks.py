@@ -206,8 +206,10 @@ def _parallel_tasks(commands_to_run):
     ))
 
 
-def _is_network_error_ignored():
-    return not state.env.use_exceptions_for['network'] and state.env.skip_bad_hosts
+def _is_network_error_ignored(host):
+    if state.env.use_exceptions_for['network']:
+        return False
+    return state.env.skip_bad_hosts or (host in state.env.skip_bad_hosts_in_list)
 
 
 def _execute(task, host, my_env, args, kwargs, jobs, queue, multiprocessing):
@@ -248,14 +250,14 @@ def _execute(task, host, my_env, args, kwargs, jobs, queue, multiprocessing):
                 # print.
                 if e.__class__ is not SystemExit:
                     if not (isinstance(e, NetworkError) and
-                            _is_network_error_ignored()):
+                            _is_network_error_ignored(name)):
                         sys.stderr.write("!!! Parallel execution exception under host %r:\n" % name)
                     submit(e)
                 # Here, anything -- unexpected exceptions, or abort()
                 # driven SystemExits -- will bubble up and terminate the
                 # child process.
                 if not (isinstance(e, NetworkError) and
-                        _is_network_error_ignored()):
+                        _is_network_error_ignored(name)):
                     raise
 
         # Stuff into Process wrapper
@@ -391,7 +393,7 @@ def execute(task, *args, **kwargs):
                 # Backwards compat test re: whether to use an exception or
                 # abort
                 if not state.env.use_exceptions_for['network']:
-                    func = warn if state.env.skip_bad_hosts else abort
+                    func = warn if _is_network_error_ignored(host) else abort
                     error(e.message, func=func, exception=e.wrapped)
                 else:
                     raise
@@ -413,7 +415,7 @@ def execute(task, *args, **kwargs):
             for name, d in ran_jobs.iteritems():
                 if d['exit_code'] != 0:
                     if isinstance(d['results'], NetworkError) and \
-                            _is_network_error_ignored():
+                            _is_network_error_ignored(name):
                         error(d['results'].message, func=warn, exception=d['results'].wrapped)
                     elif isinstance(d['results'], BaseException):
                         error(err, exception=d['results'])
